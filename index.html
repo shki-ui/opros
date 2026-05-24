@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Interactive Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+    
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0; padding: 0;
+            background-color: #0b0510;
+            background-image: radial-gradient(circle at top right, #2a0845, #0b0510),
+                              radial-gradient(circle at bottom left, #3b0030, #0b0510);
+            background-attachment: fixed;
+            color: #f0e6ff;
+            overflow-x: hidden;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* ПРЕЛОАДЕР */
+        #preloader {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #0b0510; z-index: 9999;
+            display: flex; flex-direction: column; /* Выстраиваем элементы вертикально */
+            justify-content: center; align-items: center;
+            transition: opacity 0.6s ease;
+        }
+        
+        /* ТЕКСТ НАД ПРЕЛОАДЕРОМ */
+        .preloader-hint {
+            color: rgba(240, 230, 255, 0.7);
+            font-size: 13px;
+            margin-bottom: 15px;
+            font-style: italic;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .loader-wrapper { position: relative; width: 150px; height: 150px; }
+        .loader-base {
+            width: 100%; height: 100%; object-fit: cover;
+            filter: grayscale(100%); opacity: 0.2; border-radius: 20px;
+        }
+        .loader-fill {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
+            border-radius: 20px;
+            clip-path: inset(100% 0 0 0);
+            animation: fillUp 2.5s ease-in-out forwards;
+            filter: drop-shadow(0 0 15px #ff007f);
+        }
+        @keyframes fillUp {
+            0% { clip-path: inset(100% 0 0 0); }
+            100% { clip-path: inset(0 0 0 0); }
+        }
+
+        /* ОСНОВНОЙ КОНТЕЙНЕР */
+        #app-container {
+            width: 100%; max-width: 480px; min-height: 100vh;
+            padding: 20px; padding-bottom: 120px;
+            display: none; flex-direction: column;
+        }
+
+        /* ШАГИ ОПРОСА (Glassmorphism / Эффект стекла) */
+        .step {
+            display: none; width: 100%; flex-direction: column;
+            background: rgba(20, 10, 35, 0.4);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 0, 255, 0.05);
+            padding: 25px; border-radius: 24px;
+            margin-bottom: 25px; scroll-margin-top: 20px;
+        }
+        .step.active {
+            display: flex;
+            animation: slideUpFade 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(60px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ТИПОГРАФИКА И ЭЛЕМЕНТЫ ВВОДА */
+        h2 { font-size: 20px; margin: 0 0 20px 0; text-align: center; text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
+        
+        input[type="text"], textarea {
+            width: 100%; padding: 16px; 
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff; border-radius: 12px; font-size: 16px; font-family: 'Montserrat', sans-serif;
+            margin-bottom: 20px; transition: all 0.3s; resize: none;
+        }
+        input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.4); }
+        input:focus, textarea:focus { 
+            border-color: #ff00ff; outline: none;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        /* ПОДСКАЗКА ПОД ИНПУТОМ */
+        .input-hint {
+            font-size: 11px;
+            color: rgba(240, 230, 255, 0.5);
+            margin-top: -12px;
+            margin-bottom: 20px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        /* КНОПКИ */
+        button {
+            background: linear-gradient(45deg, #ff007f, #7a00ff);
+            color: #fff; border: none; padding: 16px; border-radius: 12px;
+            font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+            width: 100%; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
+        }
+        button:active { transform: scale(0.96); box-shadow: 0 2px 10px rgba(255, 0, 127, 0.4); }
+        
+        /* СТИЛЬ ДЛЯ НЕАКТИВНОЙ КНОПКИ */
+        button:disabled { 
+            background: #1a122b;
+            color: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* СЕТКА КАРТОЧЕК (3 в ряд) */
+        .roles-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 12px; 
+            margin-bottom: 25px; 
+        }
+        
+        .role-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .role-card {
+            width: 100%;
+            position: relative; border-radius: 14px; overflow: hidden;
+            transition: all 0.4s ease; 
+            border: 2px solid transparent; background: #000;
+        }
+        .role-card img {
+            width: 100%; 
+            height: 150px;
+            object-fit: cover; display: block;
+            filter: grayscale(100%) brightness(0.5); transition: all 0.4s ease;
+        }
+        
+        .role-title {
+            margin-top: 10px;
+            color: rgba(240, 230, 255, 0.6); 
+            font-weight: 800; 
+            font-size: 11px; 
+            text-align: center;
+            letter-spacing: 0.5px;
+            transition: all 0.4s ease;
+        }
+        
+        .role-wrapper.selected .role-card { 
+            border-color: #ff007f; 
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
+        }
+        .role-wrapper.selected .role-card img { 
+            filter: grayscale(0%) brightness(1.1); 
+            transform: scale(1.03); 
+        }
+        .role-wrapper.selected .role-title {
+            color: #ff007f;
+            text-shadow: 0 0 8px rgba(255, 0, 127, 0.6);
+        }
+
+        /* АЛЬБОМНЫЕ КАРТИНКИ ДЛЯ ВОПРОСОВ */
+        .question-image {
+            width: 100%; height: 180px; object-fit: cover;
+            border-radius: 12px; margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* ЭКРАН УСПЕХА */
+        #success-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(11, 5, 16, 0.95); backdrop-filter: blur(10px); z-index: 1000;
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .success-image {
+            width: 220px; height: 220px; border-radius: 50%; object-fit: cover;
+            transform: scale(0); box-shadow: 0 0 40px rgba(122, 0, 255, 0.6);
+            border: 4px solid #ff007f;
+        }
+        .success-image.pop { animation: popOut 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popOut {
+            0% { transform: scale(0) rotate(-15deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        #success-text {
+            text-align: center;
+            margin-top: 30px; font-size: 24px; font-weight: 800;
+            background: linear-gradient(45deg, #ff007f, #7a00ff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            opacity: 0; animation: fadeIn 0.5s ease 0.5s forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div id="preloader">
+    <div class="preloader-hint">*эта картина художницы</div>
+    <div class="loader-wrapper">
+        <img src="https://img.freepik.com/premium-psd/white-cat-wearing-sunglasses-with-blue-lens_1233986-33554.jpg?semt=ais_hybrid&w=740&q=80" class="loader-base" alt="loading-bg">
+        <img src="https://img.freepik.com/premium-psd/white-cat-wearing-sunglasses-with-blue-lens_1233986-33554.jpg?semt=ais_hybrid&w=740&q=80" class="loader-fill" alt="loading-color">
+    </div>
+</div>
+
+<div id="app-container">
+    
+    <div class="step active" id="step-1">
+        <h2>Инициализация. Как вас зовут?</h2>
+        <input type="text" id="user-name" placeholder="Введите имя..." oninput="validateField(1, this)">
+        <div class="input-hint">*заскриньте свой никнейм</div>
+        <button type="button" id="btn-step-1" onclick="nextStep(1, 2, this)" disabled>Продолжить</button>
+    </div>
+
+    <div class="step" id="step-2">
+        <h2 id="greeting-name">Привет! Выберите вашу роль:</h2>
+        <div class="roles-grid">
+            
+            <div class="role-wrapper" onclick="selectRole('Создатель', this)">
+                <div class="role-card">
+                    <img src="https://picsum.photos/300/450?random=21" alt="Создатель">
+                </div>
+                <div class="role-title">СОЗДАТЕЛЬ</div>
+            </div>
+            
+            <div class="role-wrapper" onclick="selectRole('Потребитель', this)">
+                <div class="role-card">
+                    <img src="https://picsum.photos/300/450?random=22" alt="Потребитель">
+                </div>
+                <div class="role-title">ПОТРЕБИТЕЛЬ</div>
+            </div>
+            
+            <div class="role-wrapper" onclick="selectRole('Спонсор', this)">
+                <div class="role-card">
+                    <img src="https://picsum.photos/300/450?random=23" alt="Спонсор">
+                </div>
+                <div class="role-title">СПОНСОР</div>
+            </div>
+            
+        </div>
+        <button type="button" id="btn-step-2" onclick="nextStep(2, 3, this)" disabled>Подтвердить</button>
+    </div>
+
+    <div class="step" id="step-3">
+        <img src="https://picsum.photos/600/300?random=4" class="question-image" alt="Image 1">
+        <h2 id="q1-text">Вопрос 1</h2>
+        <textarea id="a1" rows="3" placeholder="Ваш ответ..." oninput="validateField(3, this)"></textarea>
+        <button type="button" id="btn-step-3" onclick="nextStep(3, 4, this)" disabled>Дальше</button>
+    </div>
+
+    <div class="step" id="step-4">
+        <img src="https://picsum.photos/600/300?random=5" class="question-image" alt="Image 2">
+        <h2 id="q2-text">Вопрос 2</h2>
+        <textarea id="a2" rows="3" placeholder="Ваш ответ..." oninput="validateField(4, this)"></textarea>
+        <button type="button" id="btn-step-4" onclick="nextStep(4, 5, this)" disabled>Дальше</button>
+    </div>
+
+    <div class="step" id="step-5">
+        <img src="https://picsum.photos/600/300?random=6" class="question-image" alt="Image 3">
+        <h2 id="q3-text">Вопрос 3</h2>
+        <textarea id="a3" rows="3" placeholder="Ваш ответ..." oninput="validateField(5, this)"></textarea>
+        <button type="button" id="submit-btn" onclick="submitForm()" disabled>Отправить данные</button>
+    </div>
+
+</div>
+
+<div id="success-screen">
+    <img src="https://picsum.photos/300/300?random=7" class="success-image" id="success-img" alt="Success">
+    <div id="success-text">СИНХРОНИЗАЦИЯ ЗАВЕРШЕНА</div>
+</div>
+
+<script>
+    const questions = {
+        'Создатель': ["Что именно вы создаете?", "Какая ваша главная цель?", "С какими трудностями сталкиваетесь?"],
+        'Потребитель': ["Что вы чаще всего потребляете?", "На что обращаете внимание при выборе?", "Как часто пользуетесь услугами?"],
+        'Спонсор': ["В какие проекты готовы вкладываться?", "Чего ожидаете от создателей?", "Какой ваш примерный бюджет?"]
+    };
+
+    let selectedCategory = '';
+
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const preloader = document.getElementById('preloader');
+            preloader.style.opacity = '0';
+            setTimeout(() => {
+                preloader.style.display = 'none';
+                document.getElementById('app-container').style.display = 'flex';
+            }, 600);
+        }, 2600);
+    });
+
+    function validateField(stepNum, inputElement) {
+        const btnId = stepNum === 5 ? 'submit-btn' : 'btn-step-' + stepNum;
+        const targetButton = document.getElementById(btnId);
+        
+        if (inputElement.value.trim().length > 0) {
+            targetButton.disabled = false;
+        } else {
+            targetButton.disabled = true;
+        }
+    }
+
+    function selectRole(role, element) {
+        selectedCategory = role;
+        document.querySelectorAll('.role-wrapper').forEach(wrap => wrap.classList.remove('selected'));
+        element.classList.add('selected');
+        
+        document.getElementById('btn-step-2').disabled = false;
+    }
+
+    function nextStep(current, next, btnElement) {
+        if (current === 1) {
+            const name = document.getElementById('user-name').value;
+            document.getElementById('greeting-name').innerText = name + ", выберите вашу роль:";
+        }
+
+        if (current === 2) {
+            document.getElementById('q1-text').innerText = questions[selectedCategory][0];
+            document.getElementById('q2-text').innerText = questions[selectedCategory][1];
+            document.getElementById('q3-text').innerText = questions[selectedCategory][2];
+            document.querySelectorAll('.role-wrapper').forEach(wrap => wrap.style.pointerEvents = 'none');
+        }
+
+        if (btnElement) btnElement.style.display = 'none';
+        const currentInputs = document.getElementById('step-' + current).querySelectorAll('input, textarea');
+        currentInputs.forEach(input => {
+            input.setAttribute('readonly', true);
+            input.style.opacity = '0.6'; 
+        });
+
+        const nextEl = document.getElementById('step-' + next);
+        nextEl.style.display = 'flex';
+        void nextEl.offsetWidth; 
+        nextEl.classList.add('active');
+
+        setTimeout(() => {
+            nextEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
+
+    async function submitForm() {
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Отправка...';
+
+        const formData = {
+            "Имя": document.getElementById('user-name').value,
+            "Роль": selectedCategory,
+            "Вопрос_1": document.getElementById('a1').value,
+            "Вопрос_2": document.getElementById('a2').value,
+            "Вопрос_3": document.getElementById('a3').value
+        };
+
+        try {
+            const formspreeURL = 'https://formspree.io/f/YOUR_FORM_ID_HERE'; 
+
+            const response = await fetch(formspreeURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok || formspreeURL.includes('YOUR_FORM_ID_HERE')) {
+                const successScreen = document.getElementById('success-screen');
+                successScreen.style.display = 'flex';
+                setTimeout(() => {
+                    document.getElementById('success-img').classList.add('pop');
+                }, 50);
+            } else {
+                alert('Произошла ошибка при отправке на сервер.');
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Отправить данные';
+            }
+        } catch (error) {
+            alert('Ошибка сети! Проверьте подключение.');
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Отправить данные';
+        }
+    }
+</script>
+
+</body>
+</html>
