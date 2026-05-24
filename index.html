@@ -373,34 +373,33 @@
         };
 
         try {
-            const formspreeURL = 'https://formspree.io/f/YOUR_FORM_ID_HERE'; 
+            // !!! ВСТАВЬТЕ СЮДА ВАШУ ССЫЛКУ ИЗ ШАГА 3 !!!
+            const googleScriptURL = 'https://script.google.com/macros/s/ВАШ_УНИКАЛЬНЫЙ_ID/exec'; 
 
-            const response = await fetch(formspreeURL, {
+            const response = await fetch(googleScriptURL, {
                 method: 'POST',
+                mode: 'no-cors', // Важно для обхода ограничений CORS браузера при работе с Google Скриптами
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(formData)
             });
 
-            if (response.ok || formspreeURL.includes('YOUR_FORM_ID_HERE')) {
-                const successScreen = document.getElementById('success-screen');
-                successScreen.style.display = 'flex';
-                setTimeout(() => {
-                    document.getElementById('success-img').classList.add('pop');
-                }, 50);
-            } else {
-                alert('Произошла ошибка при отправке на сервер.');
-                submitBtn.disabled = false;
-                submitBtn.innerText = 'Отправить данные';
-            }
+            // Так как режим 'no-cors' не возвращает статус ответа (всегда статус 0),
+            // мы открываем экран успеха, если выполнение кода не ушло в блок catch
+            const successScreen = document.getElementById('success-screen');
+            successScreen.style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('success-img').classList.add('pop');
+            }, 50);
+
         } catch (error) {
-            alert('Ошибка сети! Проверьте подключение.');
+            alert('Ошибка сети или скрипта! Проверьте подключение.');
             submitBtn.disabled = false;
             submitBtn.innerText = 'Отправить данные';
         }
     }
+    
 </script>
 
 </body>
