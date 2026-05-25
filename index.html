@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Neon Interactive Form</title>
+    <title>КРЕАТИВНЫЙ КВИЗ</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
@@ -214,30 +214,27 @@
             background: linear-gradient(45deg, #ff007f, #b042ff);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             text-transform: uppercase; letter-spacing: 0.5px;
-            opacity: 0; 
-            /* Добавили forwards, чтобы текст гарантированно оставался видимым после анимации */
-            animation: fadeInFinal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+            
+            /* Изначальное свечение */
+            filter: drop-shadow(0 0 12px rgba(255, 0, 127, 0.6)) drop-shadow(0 0 4px rgba(122, 0, 255, 0.4));
+            
+            /* Добавлена зацикленная анимация пульсации */
+            animation: textPulse 2s ease-in-out infinite;
         }
 
-        /* Анимация плавного появления текста */
-        @keyframes fadeInFinal {
-            0% { opacity: 0; transform: scale(0.95); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-        
-        /* Бесконечная неоновая пульсация после появления */
-        .pulse-active {
-            animation: textNeonGlow 2.0s ease-in-out infinite alternate !important;
-        }
-
-        @keyframes textNeonGlow {
-            0% { 
-                transform: scale(1); 
-                filter: drop-shadow(0 0 5px rgba(255, 0, 127, 0.4)) drop-shadow(0 0 2px rgba(122, 0, 255, 0.2)); 
+        /* Анимация пульсации для текста спасибо */
+        @keyframes textPulse {
+            0% {
+                filter: drop-shadow(0 0 12px rgba(255, 0, 127, 0.6)) drop-shadow(0 0 4px rgba(122, 0, 255, 0.4));
+                transform: scale(1);
             }
-            100% { 
-                transform: scale(1.03); 
-                filter: drop-shadow(0 0 18px rgba(255, 0, 127, 0.8)) drop-shadow(0 0 6px rgba(122, 0, 255, 0.5)); 
+            50% {
+                filter: drop-shadow(0 0 20px rgba(255, 0, 127, 0.8)) drop-shadow(0 0 8px rgba(122, 0, 255, 0.6));
+                transform: scale(1.02); /* Легкое увеличение */
+            }
+            100% {
+                filter: drop-shadow(0 0 12px rgba(255, 0, 127, 0.6)) drop-shadow(0 0 4px rgba(122, 0, 255, 0.4));
+                transform: scale(1);
             }
         }
     </style>
@@ -268,7 +265,7 @@
     <div class="step" id="step-1">
         <h2>Инициализация. Как вас зовут?</h2>
         <input type="text" id="user-name" placeholder="Введите имя..." oninput="validateField(1, this)">
-        <div class="input-hint">*заскриньте свой никнейм</div>
+        <div class="input-hint">*сделайте и сохраните скриншот, чтобы при необходимости, мы могли связаться с автором, но не хранить Ваши данные</div>
         <button type="button" id="btn-step-1" onclick="nextStep(1, 2, this)" disabled>Продолжить</button>
     </div>
 
@@ -329,14 +326,14 @@
 <script>
     const questions = {
         'Создатель': [
-            "Какая ваша творческая идея (проект, песня, серия работ, перформанс, видео, объект) до сих пор не нашла своего зрителя или площадку, но вы точно знаете — она сделала бы жизнь в Кузбассе ярче? Опишите её в одном-двух ",
-            "Какой образ, символ, история или место Кузбасса, по вашему мнению, до сих пор не получили достойного современного высказывания в искусстве, музыке или дизайне? Что бы вы с этим сделали?",
+            "Какая ваша творческая идея (проект, песня, серия работ, перформанс, видео, объект) до сих пор не нашла своего зрителя или площадку, но вы точно знаете — она сделала бы жизнь в Кузбассе ярче? Опишите её в одном-двух предложениях",
+            "Какой образ, символ, история или место Кузбасса, по вашему мнению, до сих пор не получили достойного современного высказывания in искусстве, музыке или дизайне? Что бы вы с этим сделали?",
             "Для кого конкретно вы хотели бы создать свой проект? Опишите аудиторию: возраст, интересы, привычки. Что этот человек должен почувствовать или понять после встречи с вашей работой?"
         ],
         'Потребитель': [
             "Вспомните событие, сервис или продукт в сфере культуры или креативных индустрий в Кузбассе, после которого у вас осталось чувство: «хорошо, но можно было бы гораздо круче, если бы…» Опишите одну строчку — чего именно не хватило?",
             "Если бы вы могли заказать разработку одного нового креативного формата (фестиваль, программа, пространство, сервис) — каким был бы ваш заказ?",
-            "Какой продукт или услугу из креативной сферы вы бы с удовольствием купили прямо сейчас, если бы они существовали in Кузбассе? Опишите двумя словами или короткой фразой."
+            "Какой продукт или услугу из креативной сферы вы бы с удовольствием купили прямо сейчас, если бы они существовали в Кузбассе? Опишите двумя словами или короткой фразой."
         ],
         'Спонсор': [
             "Какой ваш продукт, сервис или технология (даже если сейчас это хобби или эксперимент) могли бы быть интересны другим людям или бизнесу в Кузбассе? Опишите его тремя словами или короткой фразой.",
@@ -353,6 +350,7 @@
 
     let selectedCategory = '';
 
+    // Ожидание загрузки: вернули фиксированные 3 секунды заставки
     window.addEventListener('load', () => {
         setTimeout(() => {
             const preloader = document.getElementById('preloader');
@@ -361,7 +359,7 @@
                 preloader.style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
             }, 600);
-        }, 3000); // 3 секунды
+        }, 3000); // 3000мс = 3 секунды
     });
 
     function startQuiz() {
@@ -462,13 +460,9 @@
             const successScreen = document.getElementById('success-screen');
             const successTextEl = document.getElementById('success-text');
             
+            // Просто выводим текст без скрывающих анимаций
             successTextEl.innerText = customFinalText;
             successScreen.style.display = 'flex';
-            
-            // Навешиваем бесконечную пульсацию строго после завершения fadeIn-анимации
-            setTimeout(() => {
-                successTextEl.classList.add('pulse-active');
-            }, 600);
 
         } catch (error) {
             console.error('Детали ошибки:', error);
