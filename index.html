@@ -46,62 +46,48 @@
             text-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
-        
+        /* Контейнер теперь подстраивается ровно под размер картинки */
         .loader-image-container { 
             position: relative; z-index: 2; 
-            width: 80vw; max-width: 280px; 
-            height: 55vh; max-height: 400px;
+            width: 85vw; max-width: 320px; 
+            aspect-ratio: 3 / 4; /* Задает фиксированное соотношение сторон как у вертикального арта */
             border-radius: 20px; overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.15);
             box-shadow: 0 0 30px rgba(122, 0, 255, 0.25);
             background: rgba(0,0,0,0.3);
+            display: flex; justify-content: center; align-items: center;
         }
         
-        .loader-art-base {
+        .loader-art-img {
             width: 100%; height: 100%; 
-            object-fit: contain; 
+            object-fit: cover; /* Картинка полностью заполняет блок без искажений */
             object-position: center;
-            filter: grayscale(100%) blur(4px); opacity: 0.15;
-        }
-        
-        .loader-art-fill {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
-            overflow: hidden;
-            animation: waveFillUp 3.0s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-        
-        .loader-art-fill img {
-            position: absolute; bottom: 0; left: 0; 
-            width: 80vw; max-width: 280px; 
-            height: 55vh; max-height: 400px;
-            object-fit: contain; 
-            object-position: center;
-            filter: drop-shadow(0 0 15px rgba(255, 0, 127, 0.4));
-        }
-        
-        .loader-art-fill::before {
-            content: ''; position: absolute; top: -15px; left: -50%; width: 200%; height: 30px;
-            background: rgba(255, 0, 127, 0.2); border-radius: 45%;
-            animation: waveRotate 1.5s linear infinite;
+            animation: imgPulse 2.5s ease-in-out infinite;
         }
 
-        @keyframes waveFillUp {
-            0% { height: 0%; }
-            100% { height: 100%; }
-        }
-        @keyframes waveRotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes imgPulse {
+            0% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 15px rgba(255, 0, 127, 0.4));
+            }
+            50% {
+                transform: scale(1.03); 
+                filter: drop-shadow(0 0 30px rgba(255, 0, 127, 0.75)); 
+            }
+            100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 15px rgba(255, 0, 127, 0.4));
+            }
         }
 
-        
+        /* ОСНОВНОЙ КОНТЕЙНЕР */
         #app-container {
             width: 100%; max-width: 480px; min-height: 100vh;
             padding: 20px; padding-bottom: 120px;
             display: none; flex-direction: column;
         }
 
-        
+        /* ШАГИ ОПРОСА И МОДАЛЬНЫЕ ОКНА */
         .step {
             display: none; width: 100%; flex-direction: column;
             background: rgba(20, 10, 35, 0.4);
@@ -226,15 +212,10 @@
             background: linear-gradient(45deg, #ff007f, #b042ff);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             text-transform: uppercase; letter-spacing: 0.5px;
-            
-            /* Изначальное свечение */
             filter: drop-shadow(0 0 12px rgba(255, 0, 127, 0.6)) drop-shadow(0 0 4px rgba(122, 0, 255, 0.4));
-            
-            /* Добавлена зацикленная анимация пульсации */
             animation: textPulse 2s ease-in-out infinite;
         }
 
-        /* Анимация пульсации для текста спасибо */
         @keyframes textPulse {
             0% {
                 filter: drop-shadow(0 0 12px rgba(255, 0, 127, 0.6)) drop-shadow(0 0 4px rgba(122, 0, 255, 0.4));
@@ -242,7 +223,7 @@
             }
             50% {
                 filter: drop-shadow(0 0 20px rgba(255, 0, 127, 0.8)) drop-shadow(0 0 8px rgba(122, 0, 255, 0.6));
-                transform: scale(1.02); /* Легкое увеличение */
+                transform: scale(1.02);
             }
             100% {
                 filter: drop-shadow(0 0 12px rgba(255, 0, 127, 0.6)) drop-shadow(0 0 4px rgba(122, 0, 255, 0.4));
@@ -257,10 +238,7 @@
     <div class="preloader-bg-blur"></div>
     <div class="preloader-hint">Автор картины: Наталья Шепелева</div>
     <div class="loader-image-container">
-        <img src="backround.png" class="loader-art-base" alt="loading-bg">
-        <div class="loader-art-fill">
-            <img src="backround.png" alt="loading-color">
-        </div>
+        <img src="backround.png" class="loader-art-img" alt="loading-art">
     </div>
 </div>
 
@@ -318,13 +296,13 @@
     </div>
 
     <div class="step" id="step-4">
-        <h2 id="q2-text">Вопрос 2</h2>
+        <h2>Вопрос 2</h2>
         <textarea id="a2" rows="4" placeholder="Ваш ответ..." oninput="validateField(4, this)"></textarea>
         <button type="button" id="btn-step-4" onclick="nextStep(4, 5, this)" disabled>Дальше</button>
     </div>
 
     <div class="step" id="step-5">
-        <h2 id="q3-text">Вопрос 3</h2>
+        <h2>Вопрос 3</h2>
         <textarea id="a3" rows="4" placeholder="Ваш ответ..." oninput="validateField(5, this)"></textarea>
         <button type="button" id="submit-btn" onclick="submitForm()" disabled>Отправить данные</button>
     </div>
@@ -339,13 +317,13 @@
     const questions = {
         'Создатель': [
             "Какая ваша творческая идея (проект, песня, серия работ, перформанс, видео, объект) до сих пор не нашла своего зрителя или площадку, но вы точно знаете — она сделала бы жизнь в Кузбассе ярче? Опишите её в одном-двух предложениях",
-            "Какой образ, символ, история или место Кузбасса, по вашему мнению, до сих пор не получили достойного современного высказывания в искусстве, музыке или дизайне? Что бы вы с этим сделали?",
+            "Какой образ, символ, история или место Кузбасса, по вашему мнению, до сих пор не получили достойного современного высказывания in искусстве, музыке или дизайне? Что бы вы с этим сделали?",
             "Для кого конкретно вы хотели бы создать свой проект? Опишите аудиторию: возраст, интересы, привычки. Что этот человек должен почувствовать или понять после встречи с вашей работой?"
         ],
         'Потребитель': [
             "Вспомните событие, сервис или продукт в сфере культуры или креативных индустрий в Кузбассе, после которого у вас осталось чувство: «хорошо, но можно было бы гораздо круче, если бы…» Опишите одну строчку — чего именно не хватило?",
             "Если бы вы могли заказать разработку одного нового креативного формата (фестиваль, программа, пространство, сервис) — каким был бы ваш заказ?",
-            "Какой продукт или услугу из креативной сферы вы бы с удовольствием купили прямо сейчас, если бы они существовали в Кузбассе? Опишите двумя словами или короткой фразой."
+            "Какой продукт или услугу из креативной сферы вы бы с удовольствием купили прямо сейчас, если бы они существовали in Кузбассе? Опишите двумя словами или короткой фразой."
         ],
         'Спонсор': [
             "Какой ваш продукт, сервис или технология (даже если сейчас это хобби или эксперимент) могли бы быть интересны другим людям или бизнесу в Кузбассе? Опишите его тремя словами или короткой фразой.",
@@ -362,7 +340,6 @@
 
     let selectedCategory = '';
 
-    
     window.addEventListener('load', () => {
         setTimeout(() => {
             const preloader = document.getElementById('preloader');
@@ -410,12 +387,14 @@
         }
 
         if (current === 2) {
-            document.getElementById('q1-text').innerText = questions[selectedCategory][0];
-            document.getElementById('q2-text').innerText = questions[selectedCategory][1];
-            document.getElementById('q3-text').innerText = questions[selectedCategory][2];
+            const stepsContainer = document.getElementById('app-container');
+            const h2Elements = stepsContainer.querySelectorAll('.step h2');
+            
+            if(h2Elements[3]) h2Elements[3].innerText = questions[selectedCategory][0];
+            if(h2Elements[4]) h2Elements[4].innerText = questions[selectedCategory][1];
+            if(h2Elements[5]) h2Elements[5].innerText = questions[selectedCategory][2];
             
             document.getElementById('role-intro-text').innerText = roleIntroTexts[selectedCategory];
-            
             document.querySelectorAll('.role-wrapper').forEach(wrap => wrap.style.pointerEvents = 'none');
         }
 
@@ -471,7 +450,6 @@
 
             const successScreen = document.getElementById('success-screen');
             const successTextEl = document.getElementById('success-text');
-            
             
             successTextEl.innerText = customFinalText;
             successScreen.style.display = 'flex';
