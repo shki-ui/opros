@@ -46,27 +46,39 @@
             text-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
-        /* Анимация волнистого плавного заполнения */
+        
         .loader-image-container { 
-            position: relative; z-index: 2; width: 250px; height: 360px; 
+            position: relative; z-index: 2; 
+            width: 80vw; max-width: 280px; 
+            height: 55vh; max-height: 400px;
             border-radius: 20px; overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.15);
             box-shadow: 0 0 30px rgba(122, 0, 255, 0.25);
             background: rgba(0,0,0,0.3);
         }
+        
         .loader-art-base {
-            width: 100%; height: 100%; object-fit: cover;
+            width: 100%; height: 100%; 
+            object-fit: contain; 
+            object-position: center;
             filter: grayscale(100%) blur(4px); opacity: 0.15;
         }
+        
         .loader-art-fill {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
             overflow: hidden;
             animation: waveFillUp 3.0s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
+        
         .loader-art-fill img {
-            position: absolute; bottom: 0; left: 0; width: 250px; height: 360px;
-            object-fit: cover; filter: drop-shadow(0 0 15px rgba(255, 0, 127, 0.4));
+            position: absolute; bottom: 0; left: 0; 
+            width: 80vw; max-width: 280px; 
+            height: 55vh; max-height: 400px;
+            object-fit: contain; 
+            object-position: center;
+            filter: drop-shadow(0 0 15px rgba(255, 0, 127, 0.4));
         }
+        
         .loader-art-fill::before {
             content: ''; position: absolute; top: -15px; left: -50%; width: 200%; height: 30px;
             background: rgba(255, 0, 127, 0.2); border-radius: 45%;
@@ -82,14 +94,14 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* ОСНОВНОЙ КОНТЕЙНЕР */
+        
         #app-container {
             width: 100%; max-width: 480px; min-height: 100vh;
             padding: 20px; padding-bottom: 120px;
             display: none; flex-direction: column;
         }
 
-        /* ШАГИ ОПРОСА И МОДАЛЬНЫЕ ОКНА */
+        
         .step {
             display: none; width: 100%; flex-direction: column;
             background: rgba(20, 10, 35, 0.4);
@@ -350,7 +362,7 @@
 
     let selectedCategory = '';
 
-    // Ожидание загрузки: вернули фиксированные 3 секунды заставки
+    
     window.addEventListener('load', () => {
         setTimeout(() => {
             const preloader = document.getElementById('preloader');
@@ -359,7 +371,7 @@
                 preloader.style.display = 'none';
                 document.getElementById('app-container').style.display = 'flex';
             }, 600);
-        }, 3000); // 3000мс = 3 секунды
+        }, 3000); 
     });
 
     function startQuiz() {
@@ -460,7 +472,7 @@
             const successScreen = document.getElementById('success-screen');
             const successTextEl = document.getElementById('success-text');
             
-            // Просто выводим текст без скрывающих анимаций
+            
             successTextEl.innerText = customFinalText;
             successScreen.style.display = 'flex';
 
